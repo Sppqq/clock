@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interactive Clock</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body { 
+      height: 100%; 
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Courier New Bold', 'Courier Bold', monospace;
+      background-color: #222;
+      color: #eee;
+      text-align: center;
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      touch-action: pan-y; 
+      overflow: hidden; 
+    }
+
+    #clock {
+      font-size: calc(4vw + 4vh); 
+      transition: font-family 0.5s ease; 
+    }
+
+    .interactive-button { 
+      position: fixed;
+      background-color: rgba(255, 255, 255, 0); 
+      color: rgba(255, 255, 255, 0); 
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease; 
+    }
+
+    #font-button {
+      bottom: 10px;
+      left: 10px;
+    }
+
+    #fullscreen-button {
+      bottom: 10px;
+      right: 10px; 
+    }
+  </style>
+  <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+</head>
+<body>
+
+  <div id="clock"></div>
+  <button id="font-button" class="interactive-button">Change Font</button>
+  <button id="fullscreen-button" class="interactive-button">Fullscreen</button>
+
+  <script>
+    function updateClock() {
+      var now = new Date();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var seconds = now.getSeconds();
+
+      hours = (hours < 10 ? "0" : "") + hours;
+      minutes = (minutes < 10 ? "0" : "") + minutes;
+      seconds = (seconds < 10 ? "0" : "") + seconds;
+
+      var timeString = hours + ":" + minutes + ":" + seconds;
+      document.getElementById("clock").innerHTML = timeString;
+    }
+
+    setInterval(updateClock, 1000);
+
+    const clockElement = document.getElementById('clock');
+    const fontButton = document.getElementById('font-button');
+    const fullscreenButton = document.getElementById('fullscreen-button');
+
+    let currentFontIndex = 0; 
+    const fontOptions = [
+      "'Courier New Bold', 'Courier Bold', monospace",
+      "'Trebuchet MS', sans-serif",
+      "'Arial', sans-serif" 
+    ];
+
+    fontButton.addEventListener('click', () => {
+      currentFontIndex = (currentFontIndex + 1) % fontOptions.length;
+      clockElement.style.fontFamily = fontOptions[currentFontIndex];
+    });
+
+    fullscreenButton.addEventListener('click', () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.documentElement.requestFullscreen();
+      }
+    });
+
+    function getDistance(x1, y1, x2, y2) {
+      let xDistance = x2 - x1;
+      let yDistance = y2 - y1;
+      return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+    }
+
+    function handleMouseMove(event) {
+      updateButtonAppearance(fontButton, event);
+      updateButtonAppearance(fullscreenButton, event);
+    }
+
+    function updateButtonAppearance(button, event) {
+      const buttonRect = button.getBoundingClientRect();
+      const buttonX = buttonRect.left + buttonRect.width / 2;
+      const buttonY = buttonRect.top + buttonRect.height / 2;
+      const distance = getDistance(event.clientX, event.clientY, buttonX, buttonY);
+      const maxDistance = 100; 
+
+      let opacity = 0; 
+      if (distance < maxDistance) {
+        opacity = 0.5 * (1 - distance / maxDistance); 
+      }
+
+      button.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
+      button.style.color = `rgba(255, 255, 255, ${opacity})`; 
+    }
+
+    document.addEventListener('mousemove', handleMouseMove); 
+  </script>
+</body>
+</html>
